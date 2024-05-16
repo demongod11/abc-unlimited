@@ -26,9 +26,9 @@ ABC_NAMESPACE_IMPL_START
 ////////////////////////////////////////////////////////////////////////
 
 // the largest number of cuts considered
-#define  MAP_CUTS_MAX_COMPUTE   1000
+#define  MAP_CUTS_MAX_COMPUTE   100000
 // the largest number of cuts used
-#define  MAP_CUTS_MAX_USE       250
+#define  MAP_CUTS_MAX_USE       100000
 
 // temporary hash table to store the cuts
 typedef struct Map_CutTableStrutct_t Map_CutTable_t;
@@ -207,6 +207,15 @@ void Map_MappingCuts( Map_Man_t * p )
         ABC_PRT( "Time", Abc_Clock() - clk );
     }
 
+    long long int cutCounter = 1;
+    Map_Cut_t * pCut;
+    for(i = 0; i < nNodes; i++){
+        pNode = p->vMapObjs->pArray[i];
+        for(pCut = pNode->pCuts->pNext; pCut; pCut = pCut->pNext){
+            cutCounter++;
+        }
+    }
+    Abc_Print(1, "Total number of cuts used are %lld\n", cutCounter);
     // print the cuts for the first primary output
 //    Map_CutListPrint( p, Map_Regular(p->pOutputs[0]) );
 }
@@ -248,7 +257,7 @@ Map_Cut_t * Map_CutCompute( Map_Man_t * p, Map_CutTable_t * pTable, Map_Node_t *
             assert( pTemp->pCuts );
             pList = Map_CutUnionLists( pList, pTemp->pCuts );
             assert( pTemp->pCuts );
-            pList = Map_CutSortCuts( p, pTable, pList );
+            // pList = Map_CutSortCuts( p, pTable, pList );
         }
     }
     // add the new cut
@@ -261,7 +270,7 @@ Map_Cut_t * Map_CutCompute( Map_Man_t * p, Map_CutTable_t * pTable, Map_Node_t *
     // set at the node
     pNode->pCuts = pCut;
     // remove the dominated cuts
-    Map_CutFilter( p, pNode );
+    // Map_CutFilter( p, pNode );
     // set the phase correctly
     if ( pNode->pRepr && Map_NodeComparePhase(pNode, pNode->pRepr) )
     {
@@ -405,8 +414,8 @@ Map_Cut_t * Map_CutMergeLists( Map_Man_t * p, Map_CutTable_t * pTable,
             // add data to the cut
             pCut->pOne = Map_CutNotCond( pTemp1, fComp1 );
             pCut->pTwo = Map_CutNotCond( pTemp2, fComp2 );
-//            if ( p->nVarsMax == 5 )
-//            pCut->uTruth = Map_CutComputeTruth( p, pCut, pTemp1, pTemp2, fComp1, fComp2 );
+           if ( p->nVarsMax == 5 )
+           pCut->uTruth = Map_CutComputeTruth( p, pCut, pTemp1, pTemp2, fComp1, fComp2 );
             // add it to the corresponding list
             pCut->pNext = pLists[(int)pCut->nLeaves];
             pLists[(int)pCut->nLeaves] = pCut;
@@ -439,8 +448,8 @@ Map_Cut_t * Map_CutMergeLists( Map_Man_t * p, Map_CutTable_t * pTable,
             // add data to the cut
             pCut->pOne = Map_CutNotCond( pTemp1, fComp1 );
             pCut->pTwo = Map_CutNotCond( pTemp2, fComp2 );
-//            if ( p->nVarsMax == 5 )
-//            pCut->uTruth = Map_CutComputeTruth( p, pCut, pTemp1, pTemp2, fComp1, fComp2 );
+           if ( p->nVarsMax == 5 )
+           pCut->uTruth = Map_CutComputeTruth( p, pCut, pTemp1, pTemp2, fComp1, fComp2 );
             // add it to the corresponding list
             pCut->pNext = pLists[(int)pCut->nLeaves];
             pLists[(int)pCut->nLeaves] = pCut;
@@ -476,8 +485,8 @@ Map_Cut_t * Map_CutMergeLists( Map_Man_t * p, Map_CutTable_t * pTable,
             // add data to the cut
             pCut->pOne = Map_CutNotCond( pTemp1, fComp1 );
             pCut->pTwo = Map_CutNotCond( pTemp2, fComp2 );
-//            if ( p->nVarsMax == 5 )
-//            pCut->uTruth = Map_CutComputeTruth( p, pCut, pTemp1, pTemp2, fComp1, fComp2 );
+           if ( p->nVarsMax == 5 )
+           pCut->uTruth = Map_CutComputeTruth( p, pCut, pTemp1, pTemp2, fComp1, fComp2 );
             // add it to the corresponding list
             pCut->pNext = pLists[(int)pCut->nLeaves];
             pLists[(int)pCut->nLeaves] = pCut;
@@ -503,7 +512,7 @@ QUITS :
     }
     *ppListNew = NULL;
     // soft the cuts by arrival times and use only the first MAP_CUTS_MAX_USE
-    pListNew = Map_CutSortCuts( p, pTable, pListNew );
+    // pListNew = Map_CutSortCuts( p, pTable, pListNew );
     return pListNew;
 }
 
@@ -570,7 +579,7 @@ QUITS :
     }
     *ppListNew = NULL;
     // soft the cuts by arrival times and use only the first MAP_CUTS_MAX_USE
-    pListNew = Map_CutSortCuts( p, pTable, pListNew );
+    // pListNew = Map_CutSortCuts( p, pTable, pListNew );
     return pListNew;
 }
 
